@@ -89,6 +89,7 @@ def selectNodesTypes(nd_to_sample, batch_size, nds):
 
 def fix_nodes(prev_mks, ind_fixed_nodes):
     given_masks = torch.tensor(prev_mks)
+    ## given_masks = prev_mks.clone().detach()
     ind_not_fixed_nodes = torch.tensor([k for k in range(given_masks.shape[0]) if k not in ind_fixed_nodes])
     ## Set non fixed masks to -1.0
     given_masks[ind_not_fixed_nodes.long()] = -1.0
@@ -105,6 +106,7 @@ def _init_input(graph, prev_state=None, mask_size=64):
     given_nds, given_eds = graph
     given_nds = given_nds.float()
     given_eds = torch.tensor(given_eds).long()
+    ## given_eds = given_eds.clone().detach().long()
     z = torch.randn(len(given_nds), 128).float()
     # unpack
     fixed_nodes = prev_state['fixed_nodes']
