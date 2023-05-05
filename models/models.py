@@ -25,6 +25,7 @@ def add_pool(x, nd_to_sample):
     pooled_x = pooled_x.scatter_add(0, pool_to, x)
     return pooled_x
 
+
 def compute_gradient_penalty(D, x, x_fake, given_y=None, given_w=None, \
                              nd_to_sample=None, data_parallel=None, \
                              ed_to_sample=None):
@@ -34,7 +35,7 @@ def compute_gradient_penalty(D, x, x_fake, given_y=None, given_w=None, \
     u = torch.FloatTensor(x.shape[0], 1, 1).to(device)
     u.data.resize_(x.shape[0], 1, 1)
     u.uniform_(0, 1)
-    x_both = x.data*u + x_fake.data*(1-u)
+    x_both = x.data * u + x_fake.data * (1 - u)
     x_both = x_both.to(device)
     x_both = Variable(x_both, requires_grad=True)
     grad_outputs = torch.ones(batch_size, 1).to(device)
@@ -47,27 +48,28 @@ def compute_gradient_penalty(D, x, x_fake, given_y=None, given_w=None, \
     gradient_penalty = ((grad.norm(2, 1).norm(2, 1) - 1) ** 2).mean()
     return gradient_penalty
 
+
 def conv_block(in_channels, out_channels, k, s, p, act=None, upsample=False, spec_norm=False, batch_norm=False):
     block = []
-    
+
     if upsample:
         if spec_norm:
             block.append(spectral_norm(torch.nn.ConvTranspose2d(in_channels, out_channels, \
-                                                   kernel_size=k, stride=s, \
-                                                   padding=p, bias=True)))
+                                                                kernel_size=k, stride=s, \
+                                                                padding=p, bias=True)))
         else:
             block.append(torch.nn.ConvTranspose2d(in_channels, out_channels, \
-                                                   kernel_size=k, stride=s, \
-                                                   padding=p, bias=True))
+                                                  kernel_size=k, stride=s, \
+                                                  padding=p, bias=True))
     else:
         if spec_norm:
             block.append(spectral_norm(torch.nn.Conv2d(in_channels, out_channels, \
                                                        kernel_size=k, stride=s, \
                                                        padding=p, bias=True)))
-        else:        
+        else:
             block.append(torch.nn.Conv2d(in_channels, out_channels, \
-                                                       kernel_size=k, stride=s, \
-                                                       padding=p, bias=True))
+                                         kernel_size=k, stride=s, \
+                                         padding=p, bias=True))
     if batch_norm:
         block.append(nn.BatchNorm2d(out_channels))
     if "leaky" in act:
@@ -78,15 +80,17 @@ def conv_block(in_channels, out_channels, k, s, p, act=None, upsample=False, spe
     #     block.append(torch.nn.Tanh())
     return block
 
+
 # Convolutional Message Passing
 class CMP(nn.Module):
     def __init__(self, in_channels):
         super(CMP, self).__init__()
         self.in_channels = in_channels
         self.encoder = nn.Sequential(
-            *conv_block(3*in_channels, 2*in_channels, 3, 1, 1, act="leaky"),
-            *conv_block(2*in_channels, 2*in_channels, 3, 1, 1, act="leaky"),
-            *conv_block(2*in_channels, in_channels, 3, 1, 1, act="leaky"))
+            *conv_block(3 * in_channels, 2 * in_channels, 3, 1, 1, act="leaky"),
+            *conv_block(2 * in_channels, 2 * in_channels, 3, 1, 1, act="leaky"),
+            *conv_block(2 * in_channels, in_channels, 3, 1, 1, act="leaky"))
+
     def forward(self, feats, edges=None):
         # allocate memory
         dtype, device = feats.dtype, feats.device
@@ -113,11 +117,12 @@ class CMP(nn.Module):
         out = self.encoder(enc_in)
         return out
 
+
 class Generator(nn.Module):
     def __init__(self):
         super(Generator, self).__init__()
         self.init_size = 32 // 4
-        self.l1 = nn.Sequential(nn.Linear(146, 16 * self.init_size ** 2)) #146
+        self.l1 = nn.Sequential(nn.Linear(146, 16 * self.init_size ** 2))  # 146
         self.upsample_1 = nn.Sequential(*conv_block(16, 16, 4, 2, 1, act="leaky", upsample=True))
         self.upsample_2 = nn.Sequential(*conv_block(16, 16, 4, 2, 1, act="leaky", upsample=True))
         self.upsample_3 = nn.Sequential(*conv_block(16, 16, 4, 2, 1, act="leaky", upsample=True))
@@ -127,8 +132,8 @@ class Generator(nn.Module):
         self.cmp_4 = CMP(in_channels=16)
         self.decoder = nn.Sequential(
             *conv_block(16, 256, 3, 1, 1, act="leaky"),
-            *conv_block(256, 128, 3, 1, 1, act="leaky"),    
-            *conv_block(128, 1, 3, 1, 1, act="tanh"))                                        
+            *conv_block(256, 128, 3, 1, 1, act="leaky"),
+            *conv_block(128, 1, 3, 1, 1, act="tanh"))
         # for finetuning
         self.l1_fixed = nn.Sequential(nn.Linear(1, 1 * self.init_size ** 2))
         self.enc_1 = nn.Sequential(
@@ -137,14 +142,14 @@ class Generator(nn.Module):
             *conv_block(32, 16, 3, 2, 1, act="leaky"))
         self.enc_2 = nn.Sequential(
             *conv_block(32, 32, 3, 1, 1, act="leaky"),
-            *conv_block(32, 16, 3, 1, 1, act="leaky"))   
+            *conv_block(32, 16, 3, 1, 1, act="leaky"))
 
     def forward(self, z, given_m=None, given_y=None, given_w=None, given_v=None):
         z = z.view(-1, 128)
         # include nodes
         y = given_y.view(-1, 18)
         z = torch.cat([z, y], 1)
-        x = self.l1(z)      
+        x = self.l1(z)
         f = x.view(-1, 16, self.init_size, self.init_size)
         # combine masks and noise vectors
         m = self.enc_1(given_m)
@@ -153,14 +158,15 @@ class Generator(nn.Module):
         # apply Conv-MPN
         x = self.cmp_1(f, given_w).view(-1, *f.shape[1:])
         x = self.upsample_1(x)
-        x = self.cmp_2(x, given_w).view(-1, *x.shape[1:])   
+        x = self.cmp_2(x, given_w).view(-1, *x.shape[1:])
         x = self.upsample_2(x)
-        x = self.cmp_3(x, given_w).view(-1, *x.shape[1:])   
+        x = self.cmp_3(x, given_w).view(-1, *x.shape[1:])
         x = self.upsample_3(x)
-        x = self.cmp_4(x, given_w).view(-1, *x.shape[1:])   
+        x = self.cmp_4(x, given_w).view(-1, *x.shape[1:])
         x = self.decoder(x.view(-1, x.shape[1], *x.shape[2:]))
         x = x.view(-1, *x.shape[2:])
         return x
+
 
 class Discriminator(nn.Module):
     def __init__(self):
@@ -198,7 +204,7 @@ class Discriminator(nn.Module):
         x = torch.cat([x, y], 1)
         # message passing -- Conv-MPN
         x = self.encoder(x)
-        x = self.cmp_1(x, given_w).view(-1, *x.shape[1:])  
+        x = self.cmp_1(x, given_w).view(-1, *x.shape[1:])
         x = self.downsample_1(x)
         x = self.cmp_2(x, given_w).view(-1, *x.shape[1:])
         x = self.downsample_2(x)
@@ -211,4 +217,3 @@ class Discriminator(nn.Module):
         x_g = add_pool(x, nd_to_sample)
         validity_global = self.fc_layer_global(x_g)
         return validity_global
-    

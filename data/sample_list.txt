@@ -1,6 +1,20 @@
-/content/drive/MyDrive/Setsubu/houseganpp/data/json/45012.json
-/content/drive/MyDrive/Setsubu/houseganpp/data/json/45161.json
-/content/drive/MyDrive/Setsubu/houseganpp/data/json/36233.json
-/content/drive/MyDrive/Setsubu/houseganpp/data/json/19307.json
-/content/drive/MyDrive/Setsubu/houseganpp/data/json/7513.json
-/content/drive/MyDrive/Setsubu/houseganpp/data/json/18477.json
+/home/akmal/APIIT/FYP Code/Housegan-data-reader/sample_output/21532.json
+/home/akmal/APIIT/FYP Code/Housegan-data-reader/sample_output/56608.json
+/home/akmal/APIIT/FYP Code/Housegan-data-reader/sample_output/41375.json
+/home/akmal/APIIT/FYP Code/Housegan-data-reader/sample_output/69225.json
+/home/akmal/APIIT/FYP Code/Housegan-data-reader/sample_output/31360.json
+/home/akmal/APIIT/FYP Code/Housegan-data-reader/sample_output/22963.json
+/home/akmal/APIIT/FYP Code/Housegan-data-reader/sample_output/32249.json
+/home/akmal/APIIT/FYP Code/Housegan-data-reader/sample_output/74865.json
+/home/akmal/APIIT/FYP Code/Housegan-data-reader/sample_output/72962.json
+/home/akmal/APIIT/FYP Code/Housegan-data-reader/sample_output/31706.json
+/home/akmal/APIIT/FYP Code/Housegan-data-reader/sample_output/60634.json
+/home/akmal/APIIT/FYP Code/Housegan-data-reader/sample_output/65743.json
+/home/akmal/APIIT/FYP Code/Housegan-data-reader/sample_output/37662.json
+/home/akmal/APIIT/FYP Code/Housegan-data-reader/sample_output/64408.json
+/home/akmal/APIIT/FYP Code/Housegan-data-reader/sample_output/72878.json
+/home/akmal/APIIT/FYP Code/Housegan-data-reader/sample_output/46783.json
+/home/akmal/APIIT/FYP Code/Housegan-data-reader/sample_output/64256.json
+/home/akmal/APIIT/FYP Code/Housegan-data-reader/sample_output/59230.json
+/home/akmal/APIIT/FYP Code/Housegan-data-reader/sample_output/59950.json
+/home/akmal/APIIT/FYP Code/Housegan-data-reader/sample_output/37627.json/
